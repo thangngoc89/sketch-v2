@@ -6,17 +6,17 @@ let initialize = () => {
   Toploop.input_name := "//toplevel//";
 };
 
-let success = (msg, loc_start, loc_end) =>
+let success = (msg, block_start, block_end) =>
   Protocol.Reply_ExecBlockContent({
     loc:
       Some({
         loc_start: {
-          line: fst(loc_start),
-          col: snd(loc_start),
+          line: fst(block_start),
+          col: snd(block_start),
         },
         loc_end: {
-          line: fst(loc_end),
-          col: snd(loc_end),
+          line: fst(block_end),
+          col: snd(block_end),
         },
       }),
     result: Ok(msg),
