@@ -10,9 +10,12 @@ let extractInfo = exn => {
   switch (Location.error_of_exn(exn)) {
   | None => (None, reportError(exn))
   | Some(`Already_displayed) => (None, reportError(exn))
-  | Some(`Ok({loc, msg, sub, if_highlight})) => (
-      Some(loc |> Core.Loc.toLocation),
-      msg,
-    )
+  | Some(`Ok({loc, msg, sub, if_highlight})) =>
+    sub
+    |> List.iter(({Location.msg, loc, _}) => {
+         Console.log(loc |> Core.Loc.toLocation);
+         Console.log(msg);
+       });
+    (Some(loc |> Core.Loc.toLocation), msg);
   };
 };

@@ -17,6 +17,7 @@
   "devDependencies": {
     "@opam/merlin": "*",
     "ocaml": "~4.7.0",
+    "@opam/rtop": "3.4.0",
     "@opam/odoc": "*"
   }
 }

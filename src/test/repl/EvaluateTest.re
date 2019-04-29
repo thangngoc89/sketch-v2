@@ -87,7 +87,25 @@ describe("success test", ({test, _}) => {
   });
 });
 
-describe("error tests", ({test, _}) =>
+describe("error tests", ({test, _}) => {
+  test("syntax error", ({expect}) => {
+    let send = error => {
+      switch (error) {
+      | Protocol.Reply_ExecBlockContent({loc: _, result}) =>
+        switch (result) {
+        | Ok(_) => ()
+        | Error({loc, message}) =>
+          Console.log(loc);
+          Console.log(message);
+        }
+      | _ => ()
+      };
+    };
+    let mock = Mock.mock1(send);
+    let _execResult = Repl.Evaluate.eval(~send=Mock.fn(mock), {|let a = {|});
+
+    expect.mock(mock).toBeCalledTimes(1);
+  });
   test("single line, error as last phrase", ({expect}) => {
     initialize();
     let send = _ => ();
@@ -99,5 +117,5 @@ describe("error tests", ({test, _}) =>
       );
 
     expect.mock(mock).toBeCalledTimes(3);
-  })
-);
+  });
+});
