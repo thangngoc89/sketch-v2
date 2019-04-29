@@ -9,7 +9,7 @@ let ppf = Format.formatter_of_buffer(buffer);
 /** {2 Communication} */;
 
 let protocolSuccess = (~loc, ~msg) =>
-  Protocol.Reply_ExecBlockContent({loc, result: Ok(msg)});
+  Protocol.Reply_ExecBlockContent({loc, result: Ok(msg |> String.trim)});
 
 let protocolError = (~loc, ~error) =>
   Protocol.Reply_ExecBlockContent({loc, result: Error(error)});
