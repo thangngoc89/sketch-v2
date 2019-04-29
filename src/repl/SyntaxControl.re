@@ -30,7 +30,7 @@ let ml = () => {
   _activeSyntax := ML;
 };
 
-let reason = () => {
+let re = () => {
   open Reason_toolchain.From_current;
   let wrap = (f, g, fmt, x) => g(fmt, f(x));
   Toploop.parse_toplevel_phrase :=

@@ -1,6 +1,6 @@
 (library
   (name Repl)
-  (flags (:standard))
+  (flags (:standard -w -27))
   (modes byte)
   (public_name sketch.repl)
   (libraries 
@@ -9,5 +9,8 @@
     compiler-libs.toplevel 
     reason
     sketch.core
+  )
+  (preprocess 
+    (pps ppx_deriving.show)
   )
 )
