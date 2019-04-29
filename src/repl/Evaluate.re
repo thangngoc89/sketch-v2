@@ -20,12 +20,6 @@ let protocolInterrupt = () => Protocol.Reply_ExecInterupted;
 
 /** {2 Execution} */
 
-[@deriving show]
-type evalStatus =
-  | Evstt_ok
-  | Evstt_error
-  | Evstt_abort;
-
 let rec last = (head, tail) =>
   switch (tail) {
   | [] => head
@@ -49,28 +43,39 @@ let locFromPhrase = {
 let eval_phrase = phrase => {
   Warnings.reset_fatal();
   Env.reset_cache_toplevel();
-  let isOk = Toploop.execute_phrase(true, ppf, phrase);
-  let message = Buffer.contents(buffer);
-  Buffer.clear(buffer);
-  (isOk, message);
+  try (
+    {
+      let isOk = Toploop.execute_phrase(true, ppf, phrase);
+      let message = Buffer.contents(buffer);
+      Buffer.clear(buffer);
+      Ok((isOk, message));
+    }
+  ) {
+  | exn => Error(exn)
+  };
 };
 
-let eval = (~send, code) => {
-  let rec loop = status =>
+let eval =
+    (~send: Protocol.reply => unit, ~complete=() => (), code: string): unit => {
+  let rec loop =
     fun
-    | [] => status
+    | [] => complete()
     | [phrase, ...tl] => {
         let loc: option(Core.Loc.t) =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
         switch (eval_phrase(phrase)) {
-        | (true, "") => loop(status, tl)
-        | (true, msg) =>
+        | Ok((true, "")) => loop(tl)
+        | Ok((true, msg)) =>
           send(protocolSuccess(~loc?, ~msg));
-          loop(status, tl);
-        | (false, msg) =>
+          loop(tl);
+        | Ok((false, msg)) =>
+          /* No ideas when this happens */
           send(protocolError(~loc?, ~error={loc, message: msg}));
-          Evstt_error;
+          complete();
+        | Error(exn) =>
+          let (loc', msg) = Error.extractInfo(exn);
+          send(protocolError(~loc?, ~error={loc: loc', message: msg}));
         };
       };
 
@@ -81,15 +86,15 @@ let eval = (~send, code) => {
       Location.init(lexbuf, filename);
       Location.input_name := filename;
       Location.input_lexbuf := Some(lexbuf);
-      loop(Evstt_ok, Toploop.parse_use_file^(lexbuf));
+      loop(Toploop.parse_use_file^(lexbuf));
     }
   ) {
   | Sys.Break =>
     send(protocolInterrupt());
-    Evstt_abort;
+    complete();
   | exn =>
     let (loc, msg) = Error.extractInfo(exn);
-    send(protocolError(~loc?, ~error={loc: loc, message: msg}));
-    Evstt_error;
+    send(protocolError(~loc?, ~error={loc, message: msg}));
+    complete();
   };
 };

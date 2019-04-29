@@ -22,6 +22,36 @@ let success = (msg, loc_start, loc_end) =>
     result: Ok(msg),
   });
 
+let error = (msg, block_start, block_end, error_start, error_end) =>
+  Protocol.Reply_ExecBlockContent({
+    loc:
+      Some({
+        loc_start: {
+          line: fst(block_start),
+          col: snd(block_start),
+        },
+        loc_end: {
+          line: fst(block_end),
+          col: snd(block_end),
+        },
+      }),
+    result:
+      Error({
+        loc:
+          Some({
+            loc_start: {
+              line: fst(error_start),
+              col: snd(error_start),
+            },
+            loc_end: {
+              line: fst(error_end),
+              col: snd(error_end),
+            },
+          }),
+        message: msg,
+      }),
+  });
+
 let spySend = () => {
   let calls = ref([]);
   let send = reply => calls := [reply, ...calls^];
@@ -89,33 +119,50 @@ describe("success test", ({test, _}) => {
 
 describe("error tests", ({test, _}) => {
   test("syntax error", ({expect}) => {
-    let send = error => {
-      switch (error) {
-      | Protocol.Reply_ExecBlockContent({loc: _, result}) =>
-        switch (result) {
-        | Ok(_) => ()
-        | Error({loc, message}) =>
-          Console.log(loc);
-          Console.log(message);
-        }
-      | _ => ()
-      };
-    };
-    let mock = Mock.mock1(send);
-    let _execResult = Repl.Evaluate.eval(~send=Mock.fn(mock), {|let a = {|});
-
-    expect.mock(mock).toBeCalledTimes(1);
-  });
-  test("single line, error as last phrase", ({expect}) => {
-    initialize();
     let send = _ => ();
     let mock = Mock.mock1(send);
-    let _execResult =
-      Repl.Evaluate.eval(
-        ~send=Mock.fn(mock),
-        {|let a = 1;\nlet b = "2"; a + b;|},
-      );
+    Repl.Evaluate.eval(~send=Mock.fn(mock), {|let a = {|});
 
-    expect.mock(mock).toBeCalledTimes(3);
+    expect.mock(mock).toBeCalledTimes(1);
+    expect.mock(mock).toBeCalledWith(
+      error(
+        "Syntax error: '}' expected\nThis '{' might be unmatched",
+        (0, 8),
+        (0, 8),
+        (0, 8),
+        (0, 8),
+      ),
+    );
+  });
+
+  test("single line, error as last phrase", ({expect}) => {
+    initialize();
+    let (calls, send) = spySend();
+
+    let _execResult =
+      Repl.Evaluate.eval(~send, "let a = 1; let b = \"2\"; a + b;");
+    let calls = List.rev(calls^);
+    expect.int(calls |> List.length).toBe(3);
+
+    expect.equal(
+      List.nth(calls, 0),
+      success("let a: int = 1;", (0, 0), (0, 8)),
+    );
+
+    expect.equal(
+      List.nth(calls, 1),
+      success("let b: string = \"2\";", (0, 11), (0, 21)),
+    );
+
+    expect.equal(
+      List.nth(calls, 2),
+      error(
+        "This expression has type string but an expression was expected of type\n         int\n",
+        (0, 24),
+        (0, 28),
+        (0, 28),
+        (0, 28),
+      ),
+    );
   });
 });
