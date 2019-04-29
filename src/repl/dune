@@ -1,10 +1,11 @@
 (library
   (name Repl)
-  (flags (:standard -w -27))
+  (flags (:standard -w -27-26))
   (modes byte)
   (public_name sketch.repl)
   (libraries 
-    console.lib 
+    console.lib
+    pastel.lib 
     compiler-libs.common 
     compiler-libs.toplevel 
     reason

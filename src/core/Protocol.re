@@ -1,9 +1,11 @@
-type loc = {
-  loc_start: (int, int),
-  loc_end: (int, int),
+type error = {
+  loc: option(Loc.t),
+  message: string,
 };
 
-type exec_result = {
-  exres_loc: loc,
-  exres_content: result(string, string),
-};
+type reply =
+  | Reply_ExecBlockContent{
+      loc: option(Loc.t),
+      result: result(string, error),
+    }
+  | Reply_ExecInterupted;

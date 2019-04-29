@@ -3,5 +3,8 @@
   (flags (:standard))
   (modes byte)
   (public_name sketch.core)
-  ; (libraries console.lib compiler-lib.common compiler-lib.toplevel reason)
+  (libraries compiler-libs.common)
+  (preprocess 
+    (pps ppx_deriving.show)
+  )
 )
