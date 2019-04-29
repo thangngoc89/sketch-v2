@@ -1,19 +1,3 @@
-/* let print = (~title, msg) => {
-     "\n"
-     ++ Pastel.(
-          <Pastel>
-            <Pastel bold=true backgroundColor=Green color=Black> title </Pastel>
-            {"\n" ++ msg}
-          </Pastel>
-        )
-     ++ "\n"
-     |> Console.log;
-   };
-   let printError: Location.error => unit =
-     ({msg, _}) => {
-       print(~title="PrintError", msg) |> Console.log;
-     }; */
-
 let reportError = exn => {
   let b = Buffer.create(256);
   let ppf = Format.formatter_of_buffer(b);

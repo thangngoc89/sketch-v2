@@ -71,6 +71,20 @@ describe("success test", ({test, _}) => {
       success("let z: int = 3;", (2, 0), (2, 9)),
     );
   });
+
+  test("single phrases in multiple lines", ({expect}) => {
+    initialize();
+    let (calls, send) = spySend();
+
+    Repl.Evaluate.eval(~send, "let myFunc = () => {\n  1\n}") |> ignore;
+
+    let calls = calls^ |> List.rev;
+    expect.int(calls |> List.length).toBe(1);
+    expect.equal(
+      List.nth(calls, 0),
+      success("let myFunc: unit => int = <fun>;", (0, 0), (2, 1)),
+    );
+  });
 });
 
 describe("error tests", ({test, _}) =>
