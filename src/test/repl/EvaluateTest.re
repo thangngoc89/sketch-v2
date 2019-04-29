@@ -39,15 +39,15 @@ describe("success test", ({test, _}) => {
     expect.int(calls |> List.length).toBe(3);
     expect.equal(
       List.nth(calls, 0),
-      success("let x: int = 1;", (0, 0), (0, 9)),
+      success("let x: int = 1;", (0, 0), (0, 8)),
     );
     expect.equal(
       List.nth(calls, 1),
-      success("let y: int = 2;", (0, 11), (0, 20)),
+      success("let y: int = 2;", (0, 11), (0, 19)),
     );
     expect.equal(
       List.nth(calls, 2),
-      success("let z: int = 3;", (0, 22), (0, 31)),
+      success("let z: int = 3;", (0, 22), (0, 30)),
     );
   });
   test("multiple lines, multiple phrases", ({expect}) => {
@@ -60,15 +60,15 @@ describe("success test", ({test, _}) => {
     expect.int(calls |> List.length).toBe(3);
     expect.equal(
       List.nth(calls, 0),
-      success("let x: int = 1;", (0, 0), (0, 9)),
+      success("let x: int = 1;", (0, 0), (0, 8)),
     );
     expect.equal(
       List.nth(calls, 1),
-      success("let y: int = 2;", (1, 0), (1, 9)),
+      success("let y: int = 2;", (1, 0), (1, 8)),
     );
     expect.equal(
       List.nth(calls, 2),
-      success("let z: int = 3;", (2, 0), (2, 9)),
+      success("let z: int = 3;", (2, 0), (2, 8)),
     );
   });
 
@@ -82,7 +82,7 @@ describe("success test", ({test, _}) => {
     expect.int(calls |> List.length).toBe(1);
     expect.equal(
       List.nth(calls, 0),
-      success("let myFunc: unit => int = <fun>;", (0, 0), (2, 1)),
+      success("let myFunc: unit => int = <fun>;", (0, 0), (2, 0)),
     );
   });
 });

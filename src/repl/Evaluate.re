@@ -8,10 +8,10 @@ let ppf = Format.formatter_of_buffer(buffer);
 
 /** {2 Communication} */;
 
-let protocolSuccess = (~loc, ~msg) =>
+let protocolSuccess = (~loc=?, ~msg) =>
   Protocol.Reply_ExecBlockContent({loc, result: Ok(msg |> String.trim)});
 
-let protocolError = (~loc, ~error) =>
+let protocolError = (~loc=?, ~error) =>
   Protocol.Reply_ExecBlockContent({loc, result: Error(error)});
 
 let protocolInterrupt = () => Protocol.Reply_ExecInterupted;
@@ -60,15 +60,16 @@ let eval = (~send, code) => {
     fun
     | [] => status
     | [phrase, ...tl] => {
-        let loc = locFromPhrase(phrase) |> Option.map(Core.Loc.toLocation);
+        let loc: option(Core.Loc.t) =
+          locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
         switch (eval_phrase(phrase)) {
         | (true, "") => loop(status, tl)
         | (true, msg) =>
-          send(protocolSuccess(~loc, ~msg));
+          send(protocolSuccess(~loc?, ~msg));
           loop(status, tl);
         | (false, msg) =>
-          send(protocolError(~loc, ~error={loc, message: msg}));
+          send(protocolError(~loc?, ~error={loc, message: msg}));
           Evstt_error;
         };
       };
@@ -88,7 +89,7 @@ let eval = (~send, code) => {
     Evstt_abort;
   | exn =>
     let (loc, msg) = Error.extractInfo(exn);
-    send(protocolError(~loc, ~error={loc, message: msg}));
+    send(protocolError(~loc?, ~error={loc: loc, message: msg}));
     Evstt_error;
   };
 };

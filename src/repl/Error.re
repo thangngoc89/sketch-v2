@@ -16,6 +16,6 @@ let extractInfo = exn => {
          Console.log(loc |> Core.Loc.toLocation);
          Console.log(msg);
        });
-    (Some(loc |> Core.Loc.toLocation), msg);
+    (loc |> Core.Loc.toLocation, msg);
   };
 };
