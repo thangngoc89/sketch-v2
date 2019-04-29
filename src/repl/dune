@@ -1,6 +1,13 @@
 (library
-  (name repl)
+  (name Repl)
   (flags (:standard))
   (modes byte)
   (public_name sketch.repl)
-  (libraries console.lib compiler-libs.common compiler-libs.toplevel reason))
+  (libraries 
+    console.lib 
+    compiler-libs.common 
+    compiler-libs.toplevel 
+    reason
+    sketch.core
+  )
+)

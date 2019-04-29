@@ -1,1 +1,0 @@
-WorkerTest.TestFramework.cli()
