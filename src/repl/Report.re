@@ -1,4 +1,7 @@
 open Util;
+module Loc = Core.Loc;
+module Evaluate = Core.Evaluate;
+
 let extractLocation =
   fun
   | Syntaxerr.Error(x) => Some(Syntaxerr.location_of_error(x))
@@ -23,23 +26,29 @@ let _debugPrintError = exn => {
   Buffer.contents(b);
 };
 
-let reportError = exn => {
-  let locFromExn =
-    extractLocation(exn) |> Option.flatMap(Core.Loc.toLocation);
+let reportError: exn => Core.Evaluate.error =
+  exn => {
+    let locFromExn = extractLocation(exn) |> Option.flatMap(Loc.toLocation);
 
-  switch (Location.error_of_exn(exn)) {
-  | None
-  | Some(`Already_displayed) => (locFromExn, Printexc.to_string(exn), [])
-  | Some(`Ok({loc, msg, sub, if_highlight})) => (
-      switch (locFromExn) {
-      | None => loc |> Core.Loc.toLocation
-      | Some(loc) => Some(loc)
-      },
-      msg,
-      sub
-      |> List.map(({Location.loc, msg, _}) =>
-           (loc |> Core.Loc.toLocation, msg)
-         ),
-    )
+    switch (Location.error_of_exn(exn)) {
+    | None
+    | Some(`Already_displayed) => {
+        Evaluate.errLoc: locFromExn,
+        Evaluate.errMsg: Printexc.to_string(exn),
+        Evaluate.errSub: [],
+      }
+    | Some(`Ok({loc, msg, sub, if_highlight})) => {
+        Evaluate.errLoc:
+          switch (locFromExn) {
+          | None => loc |> Loc.toLocation
+          | Some(loc) => Some(loc)
+          },
+        Evaluate.errMsg: msg,
+        Evaluate.errSub:
+          sub
+          |> List.map(({Location.loc, msg, _}) =>
+               (loc |> Loc.toLocation, msg)
+             ),
+      }
+    };
   };
-};

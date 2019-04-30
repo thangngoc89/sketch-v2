@@ -124,11 +124,11 @@ let eval =
           complete(EvalError);
         | Error(exn) =>
           let extractedWarnings = warnings^;
-          let (loc', msg, sub) = Report.reportError(exn);
+          let error = Report.reportError(exn);
           send(
             protocolError(
               ~blockLoc,
-              ~error={errMsg: msg, errLoc: loc', errSub: sub},
+              ~error,
               ~warnings=extractedWarnings,
               ~stdout="",
             ),
@@ -151,11 +151,11 @@ let eval =
   | Sys.Break => complete(EvalInterupted)
   | exn =>
     let extractedWarnings = warnings^;
-    let (loc', msg, sub) = Report.reportError(exn);
+    let error = Report.reportError(exn);
     send(
       protocolError(
         ~blockLoc=None,
-        ~error={errMsg: msg, errLoc: loc', errSub: sub},
+        ~error,
         ~warnings=extractedWarnings,
         ~stdout="",
       ),
