@@ -280,7 +280,7 @@ describe("stdout", ({test, _}) =>
   })
 );
 
-describe("directives", ({test, testOnly, _}) => {
+describe("directives", ({test, _}) => {
   test("directive output to stdout", ({expect}) => {
     initialize();
     let mock = Mock.mock1(_ => ());
