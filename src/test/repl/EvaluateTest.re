@@ -258,8 +258,9 @@ describe("error tests", ({test, _}) => {
   });
 });
 
-describe("stdout", ({test, _}) => {
+describe("stdout", ({test, _}) =>
   test("redirect stdout", ({expect}) => {
+    initialize();
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
@@ -276,9 +277,12 @@ describe("stdout", ({test, _}) => {
     expect.mock(mock).toBeCalledWith(
       success(~stdout="Hello world\n", "- : unit = ()", (0, 0), (0, 27)),
     );
-  });
+  })
+);
 
-  test("directives", ({expect}) => {
+describe("directives", ({test, testOnly, _}) => {
+  test("directive output to stdout", ({expect}) => {
+    initialize();
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
@@ -297,7 +301,8 @@ describe("stdout", ({test, _}) => {
     | Phrase(_) => failwith("Shouldn't reach this branch")
     };
   });
-  test("another directive", ({expect}) => {
+  test("another directive ouutput to stdout", ({expect}) => {
+    initialize();
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
@@ -314,7 +319,8 @@ describe("stdout", ({test, _}) => {
     expect.mock(mock).toBeCalledWith(Directive("let a: int;\n"));
   });
 
-  /* test("directive with error", ({expect}) => {
+  test("directive output to Toploop.execute_phrase buffer", ({expect}) => {
+    initialize();
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
@@ -325,11 +331,52 @@ describe("stdout", ({test, _}) => {
     );
     /* Inspect overal result */
     expect.mock(mockComplete).toBeCalledTimes(1);
-    /* expect.mock(mockComplete).toBeCalledWith(EvalSuccess); */
+    expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
     expect.mock(mock).toBeCalledWith(
       Directive("Wrong type of argument for directive `show_val'.\n"),
     );
-    Mock.getCalls(mock) |> List.hd |> show_result |> Console.log;
-  }); */
+  });
+
+  test("directive with error", ({expect}) => {
+    initialize();
+    let mock = Mock.mock1(_ => ());
+    let mockComplete = Mock.mock1(_ => ());
+
+    Repl.Evaluate.eval(
+      ~send=Mock.fn(mock),
+      ~complete=Mock.fn(mockComplete),
+      "#show_val a;",
+    );
+    /* Inspect overal result */
+    expect.mock(mockComplete).toBeCalledTimes(1);
+    expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
+    /* Inspect each block calls */
+
+    expect.mock(mock).toBeCalledWith(Directive("Unbound value a"));
+  });
+
+  test(
+    "ignore directives with error and continue the evaluation", ({expect}) => {
+    initialize();
+    let mock = Mock.mock1(_ => ());
+    let mockComplete = Mock.mock1(_ => ());
+
+    Repl.Evaluate.eval(
+      ~send=Mock.fn(mock),
+      ~complete=Mock.fn(mockComplete),
+      "#show_val a; let x = 1; let y = 2;",
+    );
+    /* Inspect overal result */
+    expect.mock(mockComplete).toBeCalledTimes(1);
+    expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
+    /* Inspect each block calls */
+    expect.mock(mock).toBeCalledTimes(3);
+    expect.mock(mock).toBeCalledWith(Directive("Unbound value a"));
+    let calls = Mock.getCalls(mock) |> List.rev;
+    expect.equal(
+      List.nth(calls, 1),
+      success("let x: int = 1;", (0, 13), (0, 21)),
+    );
+  });
 });

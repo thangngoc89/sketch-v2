@@ -103,15 +103,35 @@ let eval =
     | [phrase, ...tl] => {
         let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
-        let getStdout = readStdout();
 
+        /* Redirect stdout */
+        let getStdout = readStdout();
         let evalResult = eval_phrase(phrase);
+        /* Get stdout resut and return stdout back */
         let stdout = getStdout();
-        switch (evalResult) {
-        | Ok((true, "")) =>
-          send(Directive(stdout));
+
+        switch (phrase, evalResult) {
+        | (Parsetree.Ptop_dir(_name, _argument), Ok((_, msg))) =>
+          /*
+           * Directive result could be from anywhere :(
+           * #help: stdout
+           * #show_val 1: msg
+           */
+          switch (stdout, msg) {
+          | ("", "") => ()
+          | (msg, "")
+          | ("", msg) => send(Directive(msg))
+          | (msg1, msg2) => send(Directive(msg1 ++ "\n" ++ msg2))
+          };
           loop(tl);
-        | Ok((true, msg)) =>
+        | (Parsetree.Ptop_dir(_, _), Error(exn)) =>
+          let extractedWarnings = warnings^;
+          let {errMsg, _} = Report.reportError(exn);
+          send(Directive(errMsg));
+          /* Ignore directive errors */
+          loop(tl);
+        | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
+        | (Parsetree.Ptop_def(_), Ok((true, msg))) =>
           let extractedWarnings = warnings^;
           send(
             protocolSuccess(
@@ -122,7 +142,7 @@ let eval =
             ),
           );
           loop(tl);
-        | Ok((false, msg)) =>
+        | (Parsetree.Ptop_def(_), Ok((false, msg))) =>
           let extractedWarnings = warnings^;
           /* No ideas when this happens */
           send(
@@ -134,7 +154,7 @@ let eval =
             ),
           );
           complete(EvalError);
-        | Error(exn) =>
+        | (Parsetree.Ptop_def(_), Error(exn)) =>
           let extractedWarnings = warnings^;
           let error = Report.reportError(exn);
           send(

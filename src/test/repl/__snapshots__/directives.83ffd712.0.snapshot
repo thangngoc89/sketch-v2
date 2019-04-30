@@ -1,4 +1,4 @@
-stdout › directives
+directives › directive output to stdout
                               General
 #help
   Prints a list of all available directives, with corresponding argument type
