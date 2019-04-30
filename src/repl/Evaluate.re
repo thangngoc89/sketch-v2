@@ -8,17 +8,19 @@ let ppf = Format.formatter_of_buffer(buffer);
 
 /** {2 Communication} */;
 
-let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) => {
-  blockLoc,
-  blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
-  blockStdout: stdout,
-};
+let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) =>
+  Phrase({
+    blockLoc,
+    blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
+    blockStdout: stdout,
+  });
 
-let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) => {
-  blockLoc,
-  blockContent: BlockError({error, warnings}),
-  blockStdout: stdout,
-};
+let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) =>
+  Phrase({
+    blockLoc,
+    blockContent: BlockError({error, warnings}),
+    blockStdout: stdout,
+  });
 
 /** {2 Execution} */;
 
@@ -87,7 +89,12 @@ let eval_phrase = phrase => {
 };
 
 let eval =
-    (~send: blockResult => unit, ~complete: evalResult => unit, code: string)
+    (
+      ~send: Core.Evaluate.result => unit,
+      ~complete: evalResult => unit,
+      ~readStdout: (unit, unit) => string=Stdout.read_stdout,
+      code: string,
+    )
     : unit => {
   warnings := [];
   let rec loop =
@@ -97,20 +104,45 @@ let eval =
         let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
-        switch (eval_phrase(phrase)) {
-        | Ok((true, "")) => loop(tl)
-        | Ok((true, msg)) =>
+        /* Redirect stdout */
+        let getStdout = readStdout();
+        let evalResult = eval_phrase(phrase);
+        /* Get stdout resut and return stdout back */
+        let stdout = getStdout();
+
+        switch (phrase, evalResult) {
+        | (Parsetree.Ptop_dir(_name, _argument), Ok((_, msg))) =>
+          /*
+           * Directive result could be from anywhere :(
+           * #help: stdout
+           * #show_val 1: msg
+           */
+          switch (stdout, msg) {
+          | ("", "") => ()
+          | (msg, "")
+          | ("", msg) => send(Directive(msg))
+          | (msg1, msg2) => send(Directive(msg1 ++ "\n" ++ msg2))
+          };
+          loop(tl);
+        | (Parsetree.Ptop_dir(_, _), Error(exn)) =>
+          let extractedWarnings = warnings^;
+          let {errMsg, _} = Report.reportError(exn);
+          send(Directive(errMsg));
+          /* Ignore directive errors */
+          loop(tl);
+        | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
+        | (Parsetree.Ptop_def(_), Ok((true, msg))) =>
           let extractedWarnings = warnings^;
           send(
             protocolSuccess(
               ~blockLoc,
               ~msg,
               ~warnings=extractedWarnings,
-              ~stdout="",
+              ~stdout,
             ),
           );
           loop(tl);
-        | Ok((false, msg)) =>
+        | (Parsetree.Ptop_def(_), Ok((false, msg))) =>
           let extractedWarnings = warnings^;
           /* No ideas when this happens */
           send(
@@ -118,11 +150,11 @@ let eval =
               ~blockLoc,
               ~error={errMsg: msg, errLoc: None, errSub: []},
               ~warnings=extractedWarnings,
-              ~stdout="",
+              ~stdout,
             ),
           );
           complete(EvalError);
-        | Error(exn) =>
+        | (Parsetree.Ptop_def(_), Error(exn)) =>
           let extractedWarnings = warnings^;
           let error = Report.reportError(exn);
           send(
@@ -130,7 +162,7 @@ let eval =
               ~blockLoc,
               ~error,
               ~warnings=extractedWarnings,
-              ~stdout="",
+              ~stdout,
             ),
           );
           complete(EvalError);
