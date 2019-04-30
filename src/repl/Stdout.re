@@ -1,3 +1,6 @@
+/*
+ * From https://github.com/ocaml/ocaml/blob/9f904f9a5c3752df296e5d04a50970a90addf7a7/tools/caml_tex.ml#L102-L125
+ */
 let read_stdout = () => {
   let oldstdout = Unix.dup(Unix.stdout);
   let (stdout_out, stdout_in) = Unix.pipe(~cloexec=true, ());
