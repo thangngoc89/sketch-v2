@@ -1,5 +1,5 @@
 {
-  "checksum": "69d899f8cff52931b61dc4262ce35bd6",
+  "checksum": "12699196fc217352dd297d7780fc3e32",
   "root": "sketch@link-dev:./package.json",
   "node": {
     "sketch@link-dev:./package.json": {
@@ -214,21 +214,14 @@
         "ocaml@4.7.1004@d41d8cd9", "@opam/uchar@opam:0.0.2@c8218eea"
       ]
     },
-    "@opam/utop@opam:2.3.0@fe1af53b": {
-      "id": "@opam/utop@opam:2.3.0@fe1af53b",
+    "@opam/utop@github:ocaml-community/utop:utop.opam#5637c67@d41d8cd9": {
+      "id":
+        "@opam/utop@github:ocaml-community/utop:utop.opam#5637c67@d41d8cd9",
       "name": "@opam/utop",
-      "version": "opam:2.3.0",
+      "version": "github:ocaml-community/utop:utop.opam#5637c67",
       "source": {
         "type": "install",
-        "source": [
-          "archive:https://opam.ocaml.org/cache/md5/5c/5c9e6d4ca1bea263efb9967b7ad51393#md5:5c9e6d4ca1bea263efb9967b7ad51393",
-          "archive:https://github.com/ocaml-community/utop/releases/download/2.3.0/utop-2.3.0.tbz#md5:5c9e6d4ca1bea263efb9967b7ad51393"
-        ],
-        "opam": {
-          "name": "utop",
-          "version": "2.3.0",
-          "path": "esy.lock/opam/utop.2.3.0"
-        }
+        "source": [ "github:ocaml-community/utop:utop.opam#5637c67" ]
       },
       "overrides": [],
       "dependencies": [
@@ -369,12 +362,14 @@
       },
       "overrides": [],
       "dependencies": [
-        "ocaml@4.7.1004@d41d8cd9", "@opam/utop@opam:2.3.0@fe1af53b",
+        "ocaml@4.7.1004@d41d8cd9",
+        "@opam/utop@github:ocaml-community/utop:utop.opam#5637c67@d41d8cd9",
         "@opam/reason@opam:3.4.0@9dac40ad", "@opam/dune@opam:1.9.1@61bdaadf",
         "@esy-ocaml/substs@0.0.1@d41d8cd9"
       ],
       "devDependencies": [
-        "ocaml@4.7.1004@d41d8cd9", "@opam/utop@opam:2.3.0@fe1af53b",
+        "ocaml@4.7.1004@d41d8cd9",
+        "@opam/utop@github:ocaml-community/utop:utop.opam#5637c67@d41d8cd9",
         "@opam/reason@opam:3.4.0@9dac40ad"
       ]
     },
