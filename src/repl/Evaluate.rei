@@ -1,3 +1,7 @@
 let eval:
-  (~send: Core.Protocol.reply => unit, ~complete: unit => unit=?, string) =>
+  (
+    ~send: Core.Evaluate.blockResult => unit,
+    ~complete: Core.Evaluate.evalResult => unit,
+    string
+  ) =>
   unit;

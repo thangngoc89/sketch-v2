@@ -1,5 +1,5 @@
 open Util;
-module Protocol = Core.Protocol;
+open Core.Evaluate;
 
 let buffer = Buffer.create(256);
 let ppf = Format.formatter_of_buffer(buffer);
@@ -8,17 +8,48 @@ let ppf = Format.formatter_of_buffer(buffer);
 
 /** {2 Communication} */;
 
-let protocolSuccess = (~loc=?, ~msg) =>
-  Protocol.Reply_ExecBlockContent({loc, result: Ok(msg |> String.trim)});
+let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) => {
+  blockLoc,
+  blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
+  blockStdout: stdout,
+};
 
-let protocolError = (~loc=?, ~error) =>
-  Protocol.Reply_ExecBlockContent({loc, result: Error(error)});
-
-let protocolInterrupt = () => Protocol.Reply_ExecInterupted;
+let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) => {
+  blockLoc,
+  blockContent: BlockError({error, warnings}),
+  blockStdout: stdout,
+};
 
 /** {2 Execution} */;
 
 /** {2 Execution} */
+
+let warnings = ref([]);
+
+let () =
+  Location.warning_printer :=
+    (
+      (loc, _fmt, w) => {
+        switch (Warnings.report(w)) {
+        | `Inactive => ()
+        | `Active({Warnings.number, message, is_error, sub_locs}) =>
+          warnings :=
+            [
+              {
+                warnNumber: number,
+                warnMsg: message,
+                warnLoc: Core.Loc.toLocation(loc),
+                warnSub:
+                  sub_locs
+                  |> List.map(((loc, msg)) =>
+                       (Core.Loc.toLocation(loc), msg)
+                     ),
+              },
+              ...warnings^,
+            ]
+        };
+      }
+    );
 
 let rec last = (head, tail) =>
   switch (tail) {
@@ -56,27 +87,55 @@ let eval_phrase = phrase => {
 };
 
 let eval =
-    (~send: Protocol.reply => unit, ~complete=() => (), code: string): unit => {
+    (~send: blockResult => unit, ~complete: evalResult => unit, code: string)
+    : unit => {
+  warnings := [];
   let rec loop =
     fun
-    | [] => complete()
+    | [] => complete(EvalSuccess)
     | [phrase, ...tl] => {
-        let loc: option(Core.Loc.t) =
+        let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
         switch (eval_phrase(phrase)) {
         | Ok((true, "")) => loop(tl)
         | Ok((true, msg)) =>
-          send(protocolSuccess(~loc?, ~msg));
+          let extractedWarnings = warnings^;
+          send(
+            protocolSuccess(
+              ~blockLoc,
+              ~msg,
+              ~warnings=extractedWarnings,
+              ~stdout="",
+            ),
+          );
           loop(tl);
         | Ok((false, msg)) =>
+          let extractedWarnings = warnings^;
           /* No ideas when this happens */
-          send(protocolError(~loc?, ~error={loc, message: msg}));
-          complete();
+          send(
+            protocolError(
+              ~blockLoc,
+              ~error={errMsg: msg, errLoc: None, errSub: []},
+              ~warnings=extractedWarnings,
+              ~stdout="",
+            ),
+          );
+          complete(EvalError);
         | Error(exn) =>
-          let (loc', msg) = Error.extractInfo(exn);
-          send(protocolError(~loc?, ~error={loc: loc', message: msg}));
+          let extractedWarnings = warnings^;
+          let error = Report.reportError(exn);
+          send(
+            protocolError(
+              ~blockLoc,
+              ~error,
+              ~warnings=extractedWarnings,
+              ~stdout="",
+            ),
+          );
+          complete(EvalError);
         };
+        warnings := [];
       };
 
   try (
@@ -89,12 +148,19 @@ let eval =
       loop(Toploop.parse_use_file^(lexbuf));
     }
   ) {
-  | Sys.Break =>
-    send(protocolInterrupt());
-    complete();
+  | Sys.Break => complete(EvalInterupted)
   | exn =>
-    let (loc, msg) = Error.extractInfo(exn);
-    send(protocolError(~loc?, ~error={loc, message: msg}));
-    complete();
+    let extractedWarnings = warnings^;
+    let error = Report.reportError(exn);
+    send(
+      protocolError(
+        ~blockLoc=None,
+        ~error,
+        ~warnings=extractedWarnings,
+        ~stdout="",
+      ),
+    );
+    warnings := [];
+    complete(EvalError);
   };
 };

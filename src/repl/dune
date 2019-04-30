@@ -10,6 +10,7 @@
     compiler-libs.toplevel 
     reason
     sketch.core
+    sketch.util
   )
   (preprocess 
     (pps ppx_deriving.show)
