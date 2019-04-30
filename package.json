@@ -19,5 +19,8 @@
     "ocaml": "~4.7.0",
     "@opam/rtop": "3.4.0",
     "@opam/odoc": "*"
+  },
+  "resolutions": {
+    "@opam/utop": "github:ocaml-community/utop:utop.opam#5637c67"
   }
 }
