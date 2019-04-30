@@ -25,11 +25,13 @@ type blockContent =
     };
 
 [@deriving show]
-type blockResult = {
-  blockLoc: option(Loc.t),
-  blockContent,
-  blockStdout: string,
-};
+type result =
+  | Phrase{
+      blockLoc: option(Loc.t),
+      blockContent,
+      blockStdout: string,
+    }
+  | Directive(string);
 
 type evalResult =
   | EvalSuccess

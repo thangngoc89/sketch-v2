@@ -8,17 +8,19 @@ let ppf = Format.formatter_of_buffer(buffer);
 
 /** {2 Communication} */;
 
-let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) => {
-  blockLoc,
-  blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
-  blockStdout: stdout,
-};
+let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) =>
+  Phrase({
+    blockLoc,
+    blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
+    blockStdout: stdout,
+  });
 
-let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) => {
-  blockLoc,
-  blockContent: BlockError({error, warnings}),
-  blockStdout: stdout,
-};
+let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) =>
+  Phrase({
+    blockLoc,
+    blockContent: BlockError({error, warnings}),
+    blockStdout: stdout,
+  });
 
 /** {2 Execution} */;
 
@@ -87,7 +89,12 @@ let eval_phrase = phrase => {
 };
 
 let eval =
-    (~send: blockResult => unit, ~complete: evalResult => unit, code: string)
+    (
+      ~send: Core.Evaluate.result => unit,
+      ~complete: evalResult => unit,
+      ~readStdout: (unit, unit) => string=Stdout.read_stdout,
+      code: string,
+    )
     : unit => {
   warnings := [];
   let rec loop =
@@ -96,9 +103,14 @@ let eval =
     | [phrase, ...tl] => {
         let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
+        let getStdout = readStdout();
 
-        switch (eval_phrase(phrase)) {
-        | Ok((true, "")) => loop(tl)
+        let evalResult = eval_phrase(phrase);
+        let stdout = getStdout();
+        switch (evalResult) {
+        | Ok((true, "")) =>
+          send(Directive(stdout));
+          loop(tl);
         | Ok((true, msg)) =>
           let extractedWarnings = warnings^;
           send(
@@ -106,7 +118,7 @@ let eval =
               ~blockLoc,
               ~msg,
               ~warnings=extractedWarnings,
-              ~stdout="",
+              ~stdout,
             ),
           );
           loop(tl);
@@ -118,7 +130,7 @@ let eval =
               ~blockLoc,
               ~error={errMsg: msg, errLoc: None, errSub: []},
               ~warnings=extractedWarnings,
-              ~stdout="",
+              ~stdout,
             ),
           );
           complete(EvalError);
@@ -130,7 +142,7 @@ let eval =
               ~blockLoc,
               ~error,
               ~warnings=extractedWarnings,
-              ~stdout="",
+              ~stdout,
             ),
           );
           complete(EvalError);
