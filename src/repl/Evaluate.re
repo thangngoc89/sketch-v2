@@ -96,11 +96,11 @@ let eval =
     | [phrase, ...tl] => {
         let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
-        let extractedWarnings = warnings^;
 
         switch (eval_phrase(phrase)) {
         | Ok((true, "")) => loop(tl)
         | Ok((true, msg)) =>
+          let extractedWarnings = warnings^;
           send(
             protocolSuccess(
               ~blockLoc,
@@ -111,6 +111,7 @@ let eval =
           );
           loop(tl);
         | Ok((false, msg)) =>
+          let extractedWarnings = warnings^;
           /* No ideas when this happens */
           send(
             protocolError(
@@ -122,6 +123,7 @@ let eval =
           );
           complete(EvalError);
         | Error(exn) =>
+          let extractedWarnings = warnings^;
           let (loc', msg, sub) = Report.reportError(exn);
           send(
             protocolError(
@@ -131,6 +133,7 @@ let eval =
               ~stdout="",
             ),
           );
+          complete(EvalError);
         };
         warnings := [];
       };
@@ -152,7 +155,7 @@ let eval =
     send(
       protocolError(
         ~blockLoc=None,
-        ~error={errMsg: msg, errLoc: None, errSub: sub},
+        ~error={errMsg: msg, errLoc: loc', errSub: sub},
         ~warnings=extractedWarnings,
         ~stdout="",
       ),

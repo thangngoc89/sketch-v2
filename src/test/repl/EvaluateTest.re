@@ -19,6 +19,15 @@ let makeLoc = (loc_start, loc_end) => {
   };
 };
 
+let makeWarning = (~sub=[], ~number, ~msg, block_start, block_end) => {
+  {
+    warnLoc: Some(makeLoc(block_start, block_end)),
+    warnNumber: number,
+    warnMsg: msg,
+    warnSub: sub,
+  };
+};
+
 let success = (~warnings=[], ~stdout="", msg, block_start, block_end) => {
   blockLoc: Some(makeLoc(block_start, block_end)),
   blockContent: BlockSuccess({msg, warnings}),
@@ -141,9 +150,44 @@ describe("success test", ({test, _}) => {
       success("let myFunc: unit => int = <fun>;", (0, 0), (2, 0)),
     );
   });
+
+  test("with warnings", ({expect}) => {
+    initialize();
+    let mock = Mock.mock1(_ => ());
+    let mockComplete = Mock.mock1(_ => ());
+
+    Repl.Evaluate.eval(
+      ~send=Mock.fn(mock),
+      ~complete=Mock.fn(mockComplete),
+      "type warn = | Foo | Bar;\nfun | Foo => () | Bar => () | _ => ();",
+    );
+    /* Inspect overal result */
+    expect.mock(mockComplete).toBeCalledTimes(1);
+    expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
+    /* Inspect each block calls */
+    expect.mock(mock).toBeCalledTimes(2);
+    let calls = Mock.getCalls(mock) |> List.rev;
+
+    expect.equal(
+      List.nth(calls, 1),
+      success(
+        ~warnings=[
+          makeWarning(
+            ~number=11,
+            ~msg="this match case is unused.",
+            (1, 28),
+            (1, 30),
+          ),
+        ],
+        "- : warn => unit = <fun>",
+        (1, 0),
+        (1, 36),
+      ),
+    );
+  });
 });
 
-describe("error tests", ({test, _}) =>
+describe("error tests", ({test, _}) => {
   test("syntax error", ({expect}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
@@ -157,21 +201,6 @@ describe("error tests", ({test, _}) =>
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalError);
     /* Inspect each block calls */
-    let calls = Mock.getCalls(mock);
-    List.hd(calls) |> show_blockResult |> Console.log;
-
-    error(
-      ~errSub=[
-        (Some(makeLoc((0, 8), (0, 8))), "This '{' might be unmatched"),
-      ],
-      "Syntax error: '}' expected",
-      None,
-      (0, 8),
-      (0, 8),
-    )
-    |> show_blockResult
-    |> Console.log;
-
     expect.mock(mock).toBeCalledTimes(1);
     expect.mock(mock).toBeCalledWith(
       error(
@@ -184,35 +213,45 @@ describe("error tests", ({test, _}) =>
         (0, 8),
       ),
     );
-  })
-);
-/* test("single line, error as last phrase", ({expect}) => {
-     initialize();
-     let (calls, send) = spySend();
+  });
 
-     let _execResult =
-       Repl.Evaluate.eval(~send, "let a = 1; let b = \"2\"; a + b;");
-     let calls = List.rev(calls^);
-     expect.int(calls |> List.length).toBe(3);
+  test("single line, error as last phrase", ({expect}) => {
+    initialize();
 
-     expect.equal(
-       List.nth(calls, 0),
-       success("let a: int = 1;", (0, 0), (0, 8)),
-     );
+    let mock = Mock.mock1(_ => ());
+    let mockComplete = Mock.mock1(_ => ());
 
-     expect.equal(
-       List.nth(calls, 1),
-       success("let b: string = \"2\";", (0, 11), (0, 21)),
-     );
+    Repl.Evaluate.eval(
+      ~send=Mock.fn(mock),
+      ~complete=Mock.fn(mockComplete),
+      "let a = 1; let b = \"2\"; a + b;",
+    );
+    /* Inspect overal result */
+    expect.mock(mockComplete).toBeCalledTimes(1);
+    expect.mock(mockComplete).toBeCalledWith(EvalError);
+    /* Inspect each block calls */
+    expect.mock(mock).toBeCalledTimes(3);
 
-     expect.equal(
-       List.nth(calls, 2),
-       error(
-         "This expression has type string but an expression was expected of type\n         int\n",
-         (0, 24),
-         (0, 28),
-         (0, 28),
-         (0, 28),
-       ),
-     );
-   }); */
+    let calls = Mock.getCalls(mock) |> List.rev;
+
+    expect.equal(
+      List.nth(calls, 0),
+      success("let a: int = 1;", (0, 0), (0, 8)),
+    );
+
+    expect.equal(
+      List.nth(calls, 1),
+      success("let b: string = \"2\";", (0, 11), (0, 21)),
+    );
+
+    expect.equal(
+      List.nth(calls, 2),
+      error(
+        "This expression has type string but an expression was expected of type\n         int",
+        Some(((0, 24), (0, 28))),
+        (0, 28),
+        (0, 28),
+      ),
+    );
+  });
+});
