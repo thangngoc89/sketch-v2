@@ -1,26 +1,23 @@
 {
   "name": "sketch",
-  "version": "0.1.0",
-  "description": "Example Reason Esy Project",
-  "license": "MIT",
-  "esy": { "build": "refmterr dune build -p #{self.name}" },
-  "scripts": { "test": "esy x RunTests.exe", "doc": "esy dune build @doc" },
+  "version": "1.0.0",
+  "description": "[![Build Status](https://dev.azure.com/esy-ocaml/esy-ocaml/_apis/build/status/esy-ocaml.hello-reason?branchName=master)](https://dev.azure.com/esy-ocaml/esy-ocaml/_build/latest?definitionId=1?branchName=master)",
+  "main": "frontend/index.js",
   "dependencies": {
-    "@esy-ocaml/reason": ">= 3.4.0 < 3.5.0",
-    "@opam/dune": "*",
-    "@opam/ppx_deriving": "4.2.1",
-    "@reason-native/console": "*",
-    "@reason-native/rely": "^2.1.0",
-    "ocaml": "~4.7.0",
-    "refmterr": "*"
+    "monaco-editor": "^0.16.2"
   },
-  "devDependencies": {
-    "@opam/merlin": "*",
-    "ocaml": "~4.7.0",
-    "@opam/rtop": "3.4.0",
-    "@opam/odoc": "*"
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
   },
-  "resolutions": {
-    "@opam/utop": "github:ocaml-community/utop:utop.opam#5637c67"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thangngoc89/sketch-v2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thangngoc89/sketch-v2/issues"
+  },
+  "homepage": "https://github.com/thangngoc89/sketch-v2#readme"
 }

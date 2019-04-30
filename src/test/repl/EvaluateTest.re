@@ -281,27 +281,7 @@ describe("stdout", ({test, _}) =>
 );
 
 describe("directives", ({test, _}) => {
-  test("directive output to stdout", ({expect}) => {
-    initialize();
-    let mock = Mock.mock1(_ => ());
-    let mockComplete = Mock.mock1(_ => ());
-
-    Repl.Evaluate.eval(
-      ~send=Mock.fn(mock),
-      ~complete=Mock.fn(mockComplete),
-      "#help",
-    );
-    /* Inspect overal result */
-    expect.mock(mockComplete).toBeCalledTimes(1);
-    expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
-    /* Inspect each block calls */
-    let calls = Mock.getCalls(mock);
-    switch (calls |> List.hd) {
-    | Directive(content) => expect.string(content).toMatchSnapshot()
-    | Phrase(_) => failwith("Shouldn't reach this branch")
-    };
-  });
-  test("another directive ouutput to stdout", ({expect}) => {
+  test("directive ouutput to stdout", ({expect}) => {
     initialize();
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());

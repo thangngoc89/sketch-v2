@@ -5,10 +5,10 @@
   (public_name sketch.repl)
   (libraries 
     console.lib
-    pastel.lib 
     compiler-libs.common 
     compiler-libs.toplevel 
     reason
+    unix
     sketch.core
     sketch.util
   )
