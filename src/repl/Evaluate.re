@@ -92,11 +92,14 @@ let eval =
     (
       ~send: Core.Evaluate.result => unit,
       ~complete: evalResult => unit,
-      ~readStdout: (unit, unit) => string=Stdout.read_stdout,
+      ~readStdout: (module ReadStdout.Sig)=(module ReadStdoutUnix),
       code: string,
     )
     : unit => {
   warnings := [];
+
+  module ReadStdout = (val readStdout: ReadStdout.Sig);
+
   let rec loop =
     fun
     | [] => complete(EvalSuccess)
@@ -105,10 +108,10 @@ let eval =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
         /* Redirect stdout */
-        let getStdout = readStdout();
+        let capture = ReadStdout.start();
         let evalResult = eval_phrase(phrase);
         /* Get stdout resut and return stdout back */
-        let stdout = getStdout();
+        let stdout = ReadStdout.stop(capture);
 
         switch (phrase, evalResult) {
         | (Parsetree.Ptop_dir(_name, _argument), Ok((_, msg))) =>
