@@ -4,6 +4,7 @@ open Core.Evaluate;
 let initialize = () => {
   Toploop.initialize_toplevel_env();
   Toploop.input_name := "//toplevel//";
+  Repl.SyntaxControl.re();
 };
 
 let makeLoc = (loc_start, loc_end) => {
