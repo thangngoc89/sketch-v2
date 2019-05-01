@@ -7,15 +7,15 @@ let initialize = () => {
   Repl.SyntaxControl.re();
 };
 
-let makeLoc = (loc_start, loc_end) => {
+let makeLoc = (locStart, locEnd) => {
   Core.Loc.{
-    loc_start: {
-      line: fst(loc_start),
-      col: snd(loc_start),
+    locStart: {
+      line: fst(locStart),
+      col: snd(locStart),
     },
-    loc_end: {
-      line: fst(loc_end),
-      col: snd(loc_end),
+    locEnd: {
+      line: fst(locEnd),
+      col: snd(locEnd),
     },
   };
 };

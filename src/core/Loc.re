@@ -8,8 +8,8 @@ module Position = {
 
 [@deriving show]
 type t = {
-  loc_start: Position.t,
-  loc_end: Position.t,
+  locStart: Position.t,
+  locEnd: Position.t,
 };
 
 let toLocation: Location.t => option(t) =
@@ -56,11 +56,11 @@ let toLocation: Location.t => option(t) =
       let end_line = end_line - 1;
       let end_line_end_char = end_line_end_char - 1;
       Some({
-        loc_start: {
+        locStart: {
           line: start_line,
           col: start_line_start_char,
         },
-        loc_end: {
+        locEnd: {
           line: end_line,
           col: end_line_end_char,
         },

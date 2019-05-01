@@ -1,17 +1,24 @@
 [@deriving show]
+type sub = list((option(Loc.t), string));
+
+[@deriving show]
 type error = {
   errLoc: option(Loc.t),
   errMsg: string,
-  errSub: list((option(Loc.t), string)),
+  errSub: sub,
 };
+
+
 
 [@deriving show]
 type warning = {
   warnLoc: option(Loc.t),
   warnNumber: int,
   warnMsg: string,
-  warnSub: list((option(Loc.t), string)),
+  warnSub: sub,
 };
+
+
 
 [@deriving show]
 type blockContent =

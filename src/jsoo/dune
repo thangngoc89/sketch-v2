@@ -1,15 +1,18 @@
 (executable
   (name SketchJsoo)
-  (flags :standard -safe-string)
   (js_of_ocaml 
-   (flags :standard --no-cmis --toplevel --linkall +toplevel.js +dynlink.js)
+   (flags :standard --safe-string --no-cmis --toplevel --linkall +toplevel.js +dynlink.js)
   )
+  (modes byte)
   (preprocess (pps js_of_ocaml-ppx))
-  (link_flags -linkall -no-check-prims)
+  (link_flags -linkall)
   (libraries 
     js_of_ocaml 
     js_of_ocaml-toplevel
+    console.lib
     sketch.utop
     sketch.util
+    sketch.repl
+    sketch.core
   )
 )
