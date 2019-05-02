@@ -1,6 +1,6 @@
 # hello-reason
 
-[![Build Status](https://dev.azure.com/esy-ocaml/esy-ocaml/_apis/build/status/esy-ocaml.hello-reason?branchName=master)](https://dev.azure.com/esy-ocaml/esy-ocaml/_build/latest?definitionId=1?branchName=master)
+[![Build Status](https://dev.azure.com/hi0906/Sketch/_apis/build/status/thangngoc89.sketch-v2?branchName=master)](https://dev.azure.com/hi0906/Sketch/_build/latest?definitionId=1&branchName=master)
 
 A project which demonstrates a Reason workflow with [Esy][].
 
