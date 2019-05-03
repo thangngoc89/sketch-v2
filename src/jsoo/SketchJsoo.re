@@ -1,7 +1,5 @@
 module Js = Js_of_ocaml.Js;
 module Firebug = Js_of_ocaml.Firebug;
-module Sys_js = Js_of_ocaml.Sys_js;
-
 open Util;
 
 Js_of_ocaml_toplevel.JsooTop.initialize();
@@ -21,7 +19,6 @@ let completion = input => {
 };
 
 let execute = (js_send, input) => {
-  print_endline("calling me");
   let input = Js.to_string(input);
 
   let send: Core.Evaluate.result => unit =
@@ -32,27 +29,10 @@ let execute = (js_send, input) => {
     VendoredUTop.UTop_complete.reset();
   };
 
-  module ReadStdout: Repl.ReadStdout.Sig = {
-    type capture = Buffer.t;
-
-    let bff = Buffer.create(256);
-    Sys_js.set_channel_flusher(stdout, Buffer.add_string(bff));
-
-    let start = () => {
-      bff;
-    };
-
-    let stop = bff => {
-      let r = bff |> Buffer.contents;
-      bff |> Buffer.reset;
-      r;
-    };
-  };
-
   Repl.Evaluate.eval(
     ~send,
     ~complete,
-    ~readStdout=(module ReadStdout),
+    ~readStdout=(module ReadStdoutJs),
     input,
   );
 };
