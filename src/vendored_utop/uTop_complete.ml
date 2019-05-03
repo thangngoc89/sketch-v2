@@ -889,7 +889,7 @@ let complete ~syntax ~phrase_terminator ~input =
          List.map (function (w, Directory) -> (w, "") | (w, File) -> (w, "\"" ^ phrase_terminator)) result)
 
     (* Completion on #ppx. *)
-    | [(Symbol "#", _); (Lident ("ppx"), _); (String (tlen, false), loc)] ->
+    (* | [(Symbol "#", _); (Lident ("ppx"), _); (String (tlen, false), loc)] ->
         let file = String.sub input (loc.ofs1 + tlen) (String.length input - loc.ofs1 - tlen) in
         let filter ~dir_ok name =
           try
@@ -915,7 +915,7 @@ let complete ~syntax ~phrase_terminator ~input =
         let name = basename file in
         let result = lookup_assoc name list in
         (loc.idx2 - Zed_utf8.length name,
-         List.map (function (w, Directory) -> (w, "") | (w, File) -> (w, "\"" ^ phrase_terminator)) result)
+         List.map (function (w, Directory) -> (w, "") | (w, File) -> (w, "\"" ^ phrase_terminator)) result) *)
 
     (* Completion on #use and #mod_use *)
     | [(Symbol "#", _); (Lident "use", _); (String (tlen, false), loc)]

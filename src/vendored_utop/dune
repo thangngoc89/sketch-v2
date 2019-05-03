@@ -3,7 +3,7 @@
  (public_name sketch.utop)
  (flags :standard -safe-string)
  (modes byte)
- (libraries compiler-libs.toplevel unix)
+ (libraries compiler-libs.toplevel)
  (preprocess
   (action
    (run %{bin:cppo} -V OCAML:%{ocaml_version} %{input-file}))))
