@@ -15,5 +15,6 @@
     sketch.util
     sketch.repl
     sketch.core
+    sketch.read_stdout_js
   )
 )

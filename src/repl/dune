@@ -11,6 +11,7 @@
     unix
     sketch.core
     sketch.util
+    sketch.read_stdout
   )
   (preprocess 
     (pps ppx_deriving.show)

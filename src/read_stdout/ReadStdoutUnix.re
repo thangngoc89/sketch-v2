@@ -18,12 +18,12 @@ let start = () => {
   {backup_fd, new_out_fd, new_in_fd};
 };
 
-let stop = ({backup_fd, new_out_fd, new_in_fd}) => {
+let stop = ({backup_fd, new_out_fd, new_in_fd: _}) => {
   let b = Bytes.create(size);
   let buffer = Buffer.create(100);
   let rec read_toplevel_stdout = () =>
     switch (Unix.select([new_out_fd], [], [], 0.)) {
-    | ([a], _, _) =>
+    | ([_], _, _) =>
       let n = Unix.read(new_out_fd, b, 0, size);
       Buffer.add_subbytes(buffer, b, 0, n);
       if (n == size) {

@@ -12,6 +12,8 @@
     console.lib 
     sketch.repl 
     sketch.util
+    sketch.read_stdout
+    sketch.read_stdout_unix
    )
    (modules (:standard \ RunTests))
 )
@@ -24,6 +26,7 @@
   (link_flags (:standard -linkall))
   (flags :standard -w -33 -safe-string -rectypes)
   (public_name RunTests.exe)
+  (package sketch)
   (libraries
     sketch.test_repl
     rely.lib

@@ -7,6 +7,8 @@ let initialize = () => {
   Repl.SyntaxControl.re();
 };
 
+let eval = Repl.Evaluate.eval(~readStdout=(module ReadStdoutUnix));
+
 let makeLoc = (locStart, locEnd) => {
   Core.Loc.{
     locStart: {
@@ -72,7 +74,7 @@ describe("success test", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "let x = 1; let y = 2; let z = 3;",
@@ -104,7 +106,7 @@ describe("success test", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "let x = 1;\nlet y = 2;\nlet z = 3;",
@@ -135,7 +137,7 @@ describe("success test", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "let myFunc = () => {\n  1\n}",
@@ -158,7 +160,7 @@ describe("success test", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "type warn = | Foo | Bar;\nfun | Foo => () | Bar => () | _ => ();",
@@ -194,11 +196,7 @@ describe("error tests", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
-      ~send=Mock.fn(mock),
-      ~complete=Mock.fn(mockComplete),
-      "let a = {",
-    );
+    eval(~send=Mock.fn(mock), ~complete=Mock.fn(mockComplete), "let a = {");
     /* Inspect overal result */
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalError);
@@ -223,7 +221,7 @@ describe("error tests", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "let a = 1; let b = \"2\"; a + b;",
@@ -264,7 +262,7 @@ describe("stdout", ({test, _}) =>
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "print_endline(\"Hello world\")",
@@ -286,7 +284,7 @@ describe("directives", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "let a = 1;\n#show_val a;",
@@ -304,7 +302,7 @@ describe("directives", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "#show_val 1;",
@@ -323,7 +321,7 @@ describe("directives", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "#show_val a;",
@@ -342,7 +340,7 @@ describe("directives", ({test, _}) => {
     let mock = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
-    Repl.Evaluate.eval(
+    eval(
       ~send=Mock.fn(mock),
       ~complete=Mock.fn(mockComplete),
       "#show_val a; let x = 1; let y = 2;",
