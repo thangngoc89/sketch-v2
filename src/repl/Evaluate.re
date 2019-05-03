@@ -92,7 +92,7 @@ let eval =
     (
       ~send: Core.Evaluate.result => unit,
       ~complete: evalResult => unit,
-      ~readStdout: (module ReadStdout.Sig)=(module ReadStdoutUnix),
+      ~readStdout: (module ReadStdout.Sig),
       code: string,
     )
     : unit => {

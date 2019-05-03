@@ -29,6 +29,8 @@ jobs:
       - template: utils/create-docs.yml
       - script: "esy test"
         displayName: "Test command"
+      - script: "esy jsoo"
+        displayName: "Build toplevel"
       # - script: "esy release"
       #   displayName: "esy release"
       - template: utils/publish-build-cache.yml
