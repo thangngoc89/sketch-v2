@@ -1,5 +1,6 @@
 module Js = Js_of_ocaml.Js;
 module Firebug = Js_of_ocaml.Firebug;
+module Sys_js = Js_of_ocaml.Sys_js;
 
 open Util;
 
@@ -32,9 +33,20 @@ let execute = (js_send, input) => {
   };
 
   module ReadStdout: Repl.ReadStdout.Sig = {
-    type capture = string;
-    let start = () => "yay";
-    let stop = _ => "";
+    type capture = Buffer.t;
+
+    let bff = Buffer.create(256);
+    Sys_js.set_channel_flusher(stdout, Buffer.add_string(bff));
+
+    let start = () => {
+      bff;
+    };
+
+    let stop = bff => {
+      let r = bff |> Buffer.contents;
+      bff |> Buffer.reset;
+      r;
+    };
   };
 
   Repl.Evaluate.eval(
