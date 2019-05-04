@@ -7,19 +7,21 @@ let ppf = Format.formatter_of_buffer(buffer);
 /** {2 Communication} */;
 
 /** {2 Communication} */;
+let protocolStart =  (~blockLoc) => Phrase({
+  blockLoc,
+  blockContent: BlockStart
+});
 
 let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) =>
   Phrase({
     blockLoc,
-    blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
-    blockStdout: stdout,
+    blockContent: BlockSuccess({msg: msg |> String.trim, warnings, stdout}),
   });
 
 let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) =>
   Phrase({
     blockLoc,
-    blockContent: BlockError({error, warnings}),
-    blockStdout: stdout,
+    blockContent: BlockError({error, warnings, stdout}),
   });
 
 /** {2 Execution} */;
@@ -107,6 +109,7 @@ let eval =
         let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
+        send(protocolStart(~blockLoc));
         /* Redirect stdout */
         let capture = ReadStdout.start();
         let evalResult = eval_phrase(phrase);
@@ -123,14 +126,14 @@ let eval =
           switch (stdout, msg) {
           | ("", "") => ()
           | (msg, "")
-          | ("", msg) => send(Directive(msg))
-          | (msg1, msg2) => send(Directive(msg1 ++ "\n" ++ msg2))
+          | ("", msg) => send(Directive({blockLoc, msg}))
+          | (msg1, msg2) => send(Directive({blockLoc, msg: msg1 ++ "\n" ++ msg2}))
           };
           loop(tl);
         | (Parsetree.Ptop_dir(_, _), Error(exn)) =>
           let extractedWarnings = warnings^;
           let {errMsg, _} = Report.reportError(exn);
-          send(Directive(errMsg));
+          send(Directive({msg: errMsg, blockLoc}));
           /* Ignore directive errors */
           loop(tl);
         | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
