@@ -36,6 +36,7 @@
     "@opam/js_of_ocaml": "github:revery-ui/js_of_ocaml:js_of_ocaml.opam#e09793f",
     "@opam/js_of_ocaml-ppx": "github:revery-ui/js_of_ocaml:js_of_ocaml-ppx.opam#e09793f",
     "@opam/js_of_ocaml-compiler": "github:revery-ui/js_of_ocaml:js_of_ocaml-compiler.opam#e09793f",
-    "@opam/js_of_ocaml-toplevel": "github:revery-ui/js_of_ocaml:js_of_ocaml-toplevel.opam#e09793f"
+    "@opam/js_of_ocaml-toplevel": "github:revery-ui/js_of_ocaml:js_of_ocaml-toplevel.opam#e09793f",
+    "ocaml":  "github:thangngoc89/ocaml#93cc160"
   }
 }

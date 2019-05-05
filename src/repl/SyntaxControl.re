@@ -1,7 +1,9 @@
 open Core.Syntax;
 
 let _activeSyntax = ref(RE);
+let _seperator = ref(";");
 let current = () => _activeSyntax^;
+let currentSeperator = () => _seperator^;
 
 module ToploopBackup = {
   let parse_toplevel_phrase = Toploop.parse_toplevel_phrase^;
@@ -28,6 +30,7 @@ let ml = () => {
   Toploop.print_out_signature := ToploopBackup.print_out_signature;
   Toploop.print_out_phrase := ToploopBackup.print_out_phrase;
   _activeSyntax := ML;
+  _seperator := ";;";
 };
 
 let re = () => {
@@ -62,4 +65,5 @@ let re = () => {
   Toploop.print_out_phrase :=
     wrap(copy_out_phrase, Reason_oprint.print_out_phrase);
   _activeSyntax := RE;
+  _seperator := ";";
 };
