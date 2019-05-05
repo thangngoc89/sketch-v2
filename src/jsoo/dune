@@ -1,5 +1,7 @@
 (executable
   (name SketchJsoo)
+  (public_name sketch.jsoo)
+  (package sketch)
   (flags :standard -safe-string)
   (js_of_ocaml 
    (flags :standard --no-cmis --toplevel --linkall +toplevel.js +dynlink.js)
