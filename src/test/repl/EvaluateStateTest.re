@@ -6,6 +6,8 @@ let initialize = () => {
   Toploop.initialize_toplevel_env();
   Toploop.input_name := "//toplevel//";
   Repl.SyntaxControl.re();
+  Repl.State.reset();
+  ();
 };
 
 let eval = Repl.Evaluate.eval(~readStdout=(module ReadStdoutUnix));
@@ -68,7 +70,7 @@ let error =
   });
 };
 
-describe("evaluate state test", ({test, _}) =>
+describe("evaluate state test", ({test, _}) => {
   test("simple test", ({expect}) => {
     initialize();
 
@@ -105,5 +107,50 @@ describe("evaluate state test", ({test, _}) =>
         (0, 10),
       ),
     );
-  })
-);
+  });
+
+  test("mutation", ({expect}) => {
+    initialize();
+
+    let mockSend = Mock.mock1(_ => ());
+    let mockComplete = Mock.mock1(_ => ());
+
+    eval(
+      ~send=Mock.fn(mockSend),
+      ~complete=Mock.fn(mockComplete),
+      {|let x = ref(0);
+let incr = () => { x := x^ + 1 };
+incr();
+incr();
+print_int(x^)|},
+    );
+
+    Repl.State.printValue("x");
+
+    expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
+
+    expect.mock(mockSend).toBeCalledWith(
+      success(~stdout="2", "- : unit = ()", (4, 0), (4, 12)),
+    );
+    open Repl.State;
+
+    state^ |> IntMap.iter((key, value) => Console.log(key));
+    
+    let topState = state^ |> IntMap.find(2);
+    Repl.ToploopState.set(topState);
+    Repl.State.printValue("x");
+    let mockSend = Mock.mock1(_ => ());
+    let mockComplete = Mock.mock1(_ => ());
+
+    eval(
+      ~send=Mock.fn(mockSend),
+      ~complete=Mock.fn(mockComplete),
+      "print_int(x^)",
+    );
+    expect.mock(mockSend).toBeCalledWith(
+      success(~stdout="0", "- : unit = ()", (0, 0), (0, 12)),
+    );
+    /* let calls = Mock.getCalls(mockSend);
+       calls |> List.iter(Core.Evaluate.show_result >> Console.log); */
+  });
+});
