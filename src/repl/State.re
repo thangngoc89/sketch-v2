@@ -13,3 +13,6 @@ let add = lineNum => {
 };
 
 let printValue = value => Toploop.getvalue(value) |> Console.log;
+
+let printValueCustom = (value, bindings) =>
+  Toploop.StringMap.find(value, bindings) |> Console.log;

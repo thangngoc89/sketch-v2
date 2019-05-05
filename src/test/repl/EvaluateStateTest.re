@@ -121,24 +121,23 @@ describe("evaluate state test", ({test, _}) => {
       {|let x = ref(0);
 let incr = () => { x := x^ + 1 };
 incr();
+print_int(x^);
+incr();
 incr();
 print_int(x^)|},
     );
 
-    Repl.State.printValue("x");
-
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
 
     expect.mock(mockSend).toBeCalledWith(
-      success(~stdout="2", "- : unit = ()", (4, 0), (4, 12)),
+      success(~stdout="3", "- : unit = ()", (6, 0), (6, 12)),
     );
     open Repl.State;
 
-    state^ |> IntMap.iter((key, value) => Console.log(key));
-    
     let topState = state^ |> IntMap.find(2);
+
     Repl.ToploopState.set(topState);
-    Repl.State.printValue("x");
+
     let mockSend = Mock.mock1(_ => ());
     let mockComplete = Mock.mock1(_ => ());
 
@@ -148,7 +147,7 @@ print_int(x^)|},
       "print_int(x^)",
     );
     expect.mock(mockSend).toBeCalledWith(
-      success(~stdout="0", "- : unit = ()", (0, 0), (0, 12)),
+      success(~stdout="1", "- : unit = ()", (0, 0), (0, 12)),
     );
     /* let calls = Mock.getCalls(mockSend);
        calls |> List.iter(Core.Evaluate.show_result >> Console.log); */

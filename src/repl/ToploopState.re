@@ -1,19 +1,18 @@
 type t = {
   env: Env.t,
-  value: Toploop.StringMap.t(Obj.t),
-  global_map: Symtable.global_map,
+  value: string,
 };
+
+let flags = [Marshal.Closures];
 
 let get = () => {
   {
     env: Toploop.toplevel_env^,
-    value: Toploop.toplevel_value_bindings^,
-    global_map: Symtable.current_state(),
+    value: Marshal.to_string(Toploop.toplevel_value_bindings^, flags),
   };
 };
 
-let set = ({env, value, global_map}) => {
+let set = ({env, value}) => {
   Toploop.toplevel_env := env;
-  Toploop.toplevel_value_bindings := value;
-  Symtable.restore_state(global_map);
+  Toploop.toplevel_value_bindings := Marshal.from_string(value, 0);
 };
