@@ -8,7 +8,7 @@ Repl.SyntaxControl.re();
 let completion = input => {
   let input = Js.to_string(input);
 
-  let (startPos, completions) = Completion.complete(input);
+  let (startPos, completions) = Repl.Completion.complete(input);
 
   %js
   {

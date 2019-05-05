@@ -12,6 +12,7 @@
     sketch.core
     sketch.util
     sketch.read_stdout
+    sketch.utop
   )
   (preprocess 
     (pps ppx_deriving.show)
