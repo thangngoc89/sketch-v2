@@ -1,13 +1,12 @@
-type t = {
-  env: Env.t,
-  value: Toploop.StringMap.t(Obj.t),
+module IntMap =
+  Map.Make({
+    type t = int;
+    let compare = Pervasives.compare;
+  });
+
+let state = ref(IntMap.empty);
+
+let add = lineNum => {
+  state := state^ |> IntMap.add(lineNum, ToploopState.get());
 };
 
-let get = () => {
-  {env: Toploop.toplevel_env^, value: Toploop.toplevel_value_bindings^};
-};
-
-let set = ({env, value}) => {
-  Toploop.toplevel_env := env;
-  Toploop.toplevel_value_bindings := value;
-};

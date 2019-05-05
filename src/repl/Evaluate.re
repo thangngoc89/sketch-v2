@@ -133,8 +133,11 @@ let eval =
           send(Directive(errMsg));
           /* Ignore directive errors */
           loop(tl);
-        | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
         | (Parsetree.Ptop_def(_), Ok((true, msg))) =>
+          switch (blockLoc) {
+          | Some({locStart: _, locEnd: {line, col: _}}) => State.add(line)
+          | None => ()
+          };
           let extractedWarnings = warnings^;
           send(
             protocolSuccess(
