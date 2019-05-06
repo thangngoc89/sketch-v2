@@ -136,7 +136,6 @@ let eval =
           send(Directive(errMsg));
           /* Ignore directive errors */
           loop(tl);
-        | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
         | (Parsetree.Ptop_def(_), Ok((true, msg))) =>
           let extractedWarnings = warnings^;
           send(
