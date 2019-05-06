@@ -82,19 +82,19 @@ describe("success test", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(3);
+    expect.mock(mock).toBeCalledTimes(6);
     let calls = Mock.getCalls(mock) |> List.rev;
 
     expect.equal(
-      List.nth(calls, 0),
+      List.nth(calls, 1),
       success("let x: int = 1;", (0, 0), (0, 8)),
     );
     expect.equal(
-      List.nth(calls, 1),
+      List.nth(calls, 3),
       success("let y: int = 2;", (0, 11), (0, 19)),
     );
     expect.equal(
-      List.nth(calls, 2),
+      List.nth(calls, 5),
       success("let z: int = 3;", (0, 22), (0, 30)),
     );
   });
@@ -114,19 +114,19 @@ describe("success test", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(3);
+    expect.mock(mock).toBeCalledTimes(6);
     let calls = Mock.getCalls(mock) |> List.rev;
 
     expect.equal(
-      List.nth(calls, 0),
+      List.nth(calls, 1),
       success("let x: int = 1;", (0, 0), (0, 8)),
     );
     expect.equal(
-      List.nth(calls, 1),
+      List.nth(calls, 3),
       success("let y: int = 2;", (1, 0), (1, 8)),
     );
     expect.equal(
-      List.nth(calls, 2),
+      List.nth(calls, 5),
       success("let z: int = 3;", (2, 0), (2, 8)),
     );
   });
@@ -145,11 +145,11 @@ describe("success test", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(1);
+    expect.mock(mock).toBeCalledTimes(2);
     let calls = Mock.getCalls(mock) |> List.rev;
 
     expect.equal(
-      List.nth(calls, 0),
+      List.nth(calls, 1),
       success("let myFunc: unit => int = <fun>;", (0, 0), (2, 0)),
     );
   });
@@ -168,11 +168,11 @@ describe("success test", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(2);
+    expect.mock(mock).toBeCalledTimes(4);
     let calls = Mock.getCalls(mock) |> List.rev;
 
     expect.equal(
-      List.nth(calls, 1),
+      List.nth(calls, 3),
       success(
         ~warnings=[
           makeWarning(
@@ -229,22 +229,22 @@ describe("error tests", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalError);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(3);
+    expect.mock(mock).toBeCalledTimes(6);
 
     let calls = Mock.getCalls(mock) |> List.rev;
 
     expect.equal(
-      List.nth(calls, 0),
+      List.nth(calls, 1),
       success("let a: int = 1;", (0, 0), (0, 8)),
     );
 
     expect.equal(
-      List.nth(calls, 1),
+      List.nth(calls, 3),
       success("let b: string = \"2\";", (0, 11), (0, 21)),
     );
 
     expect.equal(
-      List.nth(calls, 2),
+      List.nth(calls, 5),
       error(
         "This expression has type string but an expression was expected of type\n         int",
         Some(((0, 24), (0, 28))),
@@ -270,8 +270,11 @@ describe("stdout", ({test, _}) =>
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(1);
-    expect.mock(mock).toBeCalledWith(
+    expect.mock(mock).toBeCalledTimes(2);
+	
+	let calls = Mock.getCalls(mock) |> List.rev;
+    expect.equal(
+      List.nth(calls, 1),
       success(~stdout="Hello world\n", "- : unit = ()", (0, 0), (0, 27)),
     );
   })
@@ -292,7 +295,7 @@ describe("directives", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(2);
+    expect.mock(mock).toBeCalledTimes(4);
     expect.mock(mock).toBeCalledWith(Directive("let a: int;\n"));
   });
 
@@ -346,11 +349,11 @@ describe("directives", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledTimes(3);
+    expect.mock(mock).toBeCalledTimes(6);
     expect.mock(mock).toBeCalledWith(Directive("Unbound value a"));
     let calls = Mock.getCalls(mock) |> List.rev;
     expect.equal(
-      List.nth(calls, 1),
+      List.nth(calls, 3),
       success("let x: int = 1;", (0, 13), (0, 21)),
     );
   });
