@@ -37,9 +37,6 @@ let success = (~warnings=[], ~stdout="", msg, block_start, block_end) =>
     blockContent: BlockSuccess({msg, warnings, stdout}),
   });
 
-let directive = (~msg, ~blockLoc) => 
-Directive({msg, blockLoc: Some(blockLoc)});
-
 let error =
     (
       ~warnings=[],
@@ -64,7 +61,7 @@ let error =
           errSub,
         },
         warnings,
-		stdout,
+        stdout,
       }),
   });
 };
@@ -296,7 +293,7 @@ describe("directives", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
     expect.mock(mock).toBeCalledTimes(2);
-    expect.mock(mock).toBeCalledWith(directive(~msg="let a: int;\n", ~blockLoc=makeLoc((1, 1), (1, 1))));
+    expect.mock(mock).toBeCalledWith(Directive("let a: int;\n"));
   });
 
   test("directive output to Toploop.execute_phrase buffer", ({expect}) => {
@@ -313,7 +310,7 @@ describe("directives", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledTimes(1);
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
-    expect.mock(mock).toBeCalledWith(directive(~msg="Wrong type of argument for directive `show_val'.\n", ~blockLoc=makeLoc((1, 1), (1, 1))));
+    expect.mock(mock).toBeCalledWith(Directive("Wrong type of argument for directive `show_val'.\n"));
   });
 
   test("directive with error", ({expect}) => {
@@ -331,7 +328,7 @@ describe("directives", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
 
-    expect.mock(mock).toBeCalledWith(directive(~msg="Unbound value a", ~blockLoc=makeLoc((1,1), (1,1))));
+    expect.mock(mock).toBeCalledWith(Directive("Unbound value a"));
   });
 
   test(
@@ -350,7 +347,7 @@ describe("directives", ({test, _}) => {
     expect.mock(mockComplete).toBeCalledWith(EvalSuccess);
     /* Inspect each block calls */
     expect.mock(mock).toBeCalledTimes(3);
-    expect.mock(mock).toBeCalledWith(directive(~msg="Unbound value a", ~blockLoc=makeLoc((1,1), (1,1))));
+    expect.mock(mock).toBeCalledWith(Directive("Unbound value a"));
     let calls = Mock.getCalls(mock) |> List.rev;
     expect.equal(
       List.nth(calls, 1),
