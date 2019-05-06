@@ -7,19 +7,21 @@ let ppf = Format.formatter_of_buffer(buffer);
 /** {2 Communication} */;
 
 /** {2 Communication} */;
+let protocolStart =  (~blockLoc) => Phrase({
+  blockLoc,
+  blockContent: BlockStart
+});
 
 let protocolSuccess = (~blockLoc, ~msg, ~warnings, ~stdout) =>
   Phrase({
     blockLoc,
-    blockContent: BlockSuccess({msg: msg |> String.trim, warnings}),
-    blockStdout: stdout,
+    blockContent: BlockSuccess({msg: msg |> String.trim, warnings, stdout}),
   });
 
 let protocolError = (~blockLoc, ~error, ~warnings, ~stdout) =>
   Phrase({
     blockLoc,
-    blockContent: BlockError({error, warnings}),
-    blockStdout: stdout,
+    blockContent: BlockError({error, warnings, stdout}),
   });
 
 /** {2 Execution} */;
@@ -107,6 +109,7 @@ let eval =
         let blockLoc =
           locFromPhrase(phrase) |> Option.flatMap(Core.Loc.toLocation);
 
+        send(protocolStart(~blockLoc));
         /* Redirect stdout */
         let capture = ReadStdout.start();
         let evalResult = eval_phrase(phrase);
@@ -133,7 +136,6 @@ let eval =
           send(Directive(errMsg));
           /* Ignore directive errors */
           loop(tl);
-        | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
         | (Parsetree.Ptop_def(_), Ok((true, msg))) =>
           let extractedWarnings = warnings^;
           send(

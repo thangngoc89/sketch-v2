@@ -22,13 +22,16 @@ type warning = {
 
 [@deriving show]
 type blockContent =
+  | BlockStart
   | BlockSuccess{
       msg: string,
       warnings: list(warning),
+      stdout: string,
     }
   | BlockError{
       error,
       warnings: list(warning),
+      stdout: string,
     };
 
 [@deriving show]
@@ -36,7 +39,6 @@ type result =
   | Phrase{
       blockLoc: option(Loc.t),
       blockContent,
-      blockStdout: string,
     }
   | Directive(string);
 
