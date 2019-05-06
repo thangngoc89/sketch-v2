@@ -272,7 +272,7 @@ describe("stdout", ({test, _}) =>
     /* Inspect each block calls */
     expect.mock(mock).toBeCalledTimes(2);
 	
-	let calls = Mock.getCalls(mock) |> List.rev;
+    let calls = Mock.getCalls(mock) |> List.rev;
     expect.equal(
       List.nth(calls, 1),
       success(~stdout="Hello world\n", "- : unit = ()", (0, 0), (0, 27)),
