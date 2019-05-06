@@ -40,10 +40,7 @@ type result =
       blockLoc: option(Loc.t),
       blockContent,
     }
-  | Directive{
-		blockLoc: option(Loc.t),
-		msg: string
-	};
+  | Directive(string);
 
 type evalResult =
   | EvalSuccess

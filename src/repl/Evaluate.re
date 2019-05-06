@@ -126,14 +126,14 @@ let eval =
           switch (stdout, msg) {
           | ("", "") => ()
           | (msg, "")
-          | ("", msg) => send(Directive({blockLoc, msg}))
-          | (msg1, msg2) => send(Directive({blockLoc, msg: msg1 ++ "\n" ++ msg2}))
+          | ("", msg) => send(Directive(msg))
+          | (msg1, msg2) => send(Directive(msg1 ++ "\n" ++ msg2))
           };
           loop(tl);
         | (Parsetree.Ptop_dir(_, _), Error(exn)) =>
           let extractedWarnings = warnings^;
           let {errMsg, _} = Report.reportError(exn);
-          send(Directive({msg: errMsg, blockLoc}));
+          send(Directive(errMsg));
           /* Ignore directive errors */
           loop(tl);
         | (Parsetree.Ptop_def(_), Ok((true, ""))) => loop(tl)
